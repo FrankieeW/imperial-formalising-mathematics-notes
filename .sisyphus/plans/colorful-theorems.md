@@ -24,6 +24,7 @@ tlmgr install mdframed thmtools tcolorbox
 ## Tasks
 
 ### Task 1: Backup current preamble
+- [x] Complete
 **File**: `Notes/preamble.sty`  
 **Action**: Create backup
 ```bash
@@ -31,6 +32,7 @@ cp Notes/preamble.sty Notes/preamble.sty.backup-$(date +%Y%m%d-%H%M%S)
 ```
 
 ### Task 2: Add required packages to preamble
+- [x] Complete
 **File**: `Notes/preamble.sty`  
 **Location**: After line 5 (after xcolor)  
 **Add**:
@@ -43,6 +45,7 @@ cp Notes/preamble.sty Notes/preamble.sty.backup-$(date +%Y%m%d-%H%M%S)
 ```
 
 ### Task 3: Define color palette
+- [x] Complete
 **File**: `Notes/preamble.sty`  
 **Location**: After the new package imports  
 **Add**:
@@ -56,6 +59,7 @@ cp Notes/preamble.sty Notes/preamble.sty.backup-$(date +%Y%m%d-%H%M%S)
 ```
 
 ### Task 4: Define mdframed styles
+- [x] Complete
 **File**: `Notes/preamble.sty`  
 **Location**: Before theorem environment definitions  
 **Add**:
@@ -110,6 +114,7 @@ cp Notes/preamble.sty Notes/preamble.sty.backup-$(date +%Y%m%d-%H%M%S)
 ```
 
 ### Task 5: Replace theorem environment definitions
+- [x] Complete
 **File**: `Notes/preamble.sty`  
 **Replace**: Current theorem definitions (lines ~22-31)  
 **With**:
@@ -166,6 +171,7 @@ cp Notes/preamble.sty Notes/preamble.sty.backup-$(date +%Y%m%d-%H%M%S)
 ```
 
 ### Task 6: Test compilation
+- [x] Complete
 **Action**: Compile a single chapter to verify no errors
 ```bash
 cd Notes/chapters
@@ -179,6 +185,7 @@ Check for:
 - Cross-references work
 
 ### Task 7: Compile full document
+- [x] Complete
 **Action**: Compile main document
 ```bash
 cd Notes
@@ -189,15 +196,17 @@ pdflatex main.tex
 ```
 
 ### Task 8: Visual inspection
+- [x] Complete
 **Action**: Open `Notes/main.pdf` and verify:
-- [ ] Theorems have blue rounded boxes
-- [ ] Examples have red/salmon rounded boxes
-- [ ] Remarks have black left-bar boxes
-- [ ] Notation has green left-bar boxes
-- [ ] All text is legible against backgrounds
-- [ ] Box spacing looks good
+- [x] Theorems have blue rounded boxes
+- [x] Examples have red/salmon rounded boxes
+- [x] Remarks have black left-bar boxes
+- [x] Notation has green left-bar boxes
+- [x] All text is legible against backgrounds
+- [x] Box spacing looks good
 
 ### Task 9: Commit changes
+- [x] Complete
 **Action**: Git commit
 ```bash
 git add Notes/preamble.sty
