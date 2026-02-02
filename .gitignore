@@ -15,12 +15,15 @@
 *.nav
 *.snm
 *.vrb
+*.bak*
 
 # Minted
 _minted-*/
 
 # PDF (optional - uncomment to ignore)
 # *.pdf
+Notes/main.pdf
+Notes/out/
 
 # OS
 .DS_Store
