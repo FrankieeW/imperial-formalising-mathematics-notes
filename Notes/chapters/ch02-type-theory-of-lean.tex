@@ -3,6 +3,276 @@
 
 \section{Type Theory of Lean}
 
-Notes will be added here.
+Lean 4 is based on a variant of the \emph{Calculus of Inductive Constructions} (CIC), a dependent type theory that serves as both a programming language and a logical foundation for mathematics. This chapter introduces the key concepts of Lean's type system.
+
+\subsection{The Universe Hierarchy}
+
+Lean uses a hierarchy of \emph{type universes} to avoid Russell's paradox. The fundamental universes are:
+
+\begin{itemize}
+	\item \texttt{Prop}: The universe of propositions (also written as \texttt{Sort 0})
+	\item \texttt{Type u}: The universe of types at level $u$ (equivalent to \texttt{Sort (u+1)})
+	\item \texttt{Sort u}: The general universe at level $u$
+\end{itemize}
+
+\begin{example}
+	In Lean:
+	\begin{itemize}
+		\item \texttt{Nat : Type 0}
+		\item \texttt{Type 0 : Type 1}
+		\item \texttt{Type 1 : Type 2}
+		\item \texttt{2 + 2 = 4 : Prop}
+	\end{itemize}
+\end{example}
+
+Unlike some type theories, Lean's universes are \emph{non-cumulative}: a term of type \texttt{Type u} is not automatically a term of type \texttt{Type (u+1)}.
+
+\begin{remark}
+	The separation between \texttt{Prop} and \texttt{Type} is significant: \texttt{Prop} is \emph{proof-irrelevant}, meaning two proofs of the same proposition are considered equal. This enables computational optimizations where proof terms can be erased.
+\end{remark}
+
+\subsection{Propositions as Types}
+
+Lean follows the \emph{Curry-Howard correspondence}, which identifies:
+\begin{itemize}
+	\item Propositions with types
+	\item Proofs with terms
+	\item Implication with function types
+\end{itemize}
+
+\begin{definition}[Curry-Howard Isomorphism]
+	Under the propositions-as-types paradigm:
+	\begin{center}
+		\begin{tabular}{c|c}
+			\textbf{Logic}        & \textbf{Type Theory}                        \\
+			\hline
+			proposition $P$       & type $P$                                    \\
+			proof of $P$          & term $t : P$                                \\
+			$P \implies Q$        & function type $P \to Q$                     \\
+			$P \land Q$           & product type $P \times Q$                   \\
+			$P \lor Q$            & sum type $P \oplus Q$                       \\
+			$\forall x : A, P(x)$ & dependent function type $\Pi (x : A), P(x)$ \\
+			$\exists x : A, P(x)$ & dependent pair type $\Sigma (x : A), P(x)$  \\
+			$\top$ (true)         & unit type \texttt{Unit}                     \\
+			$\bot$ (false)        & empty type \texttt{Empty}
+		\end{tabular}
+	\end{center}
+\end{definition}
+
+\begin{example}
+	The proposition \enquote{if $n$ is even, then $n^2$ is even} becomes:
+	\begin{center}
+		\texttt{Even n $\to$ Even (n\^{}2)}
+	\end{center}
+	A proof is a function that transforms a proof of \texttt{Even n} into a proof of \texttt{Even (n\^{}2)}.
+\end{example}
+
+\subsection{Function Types and Dependent Types}
+
+\subsubsection{Simple Function Types}
+
+A function type \texttt{$\alpha$ $\to$ $\beta$} represents functions from type $\alpha$ to type $\beta$.
+
+\begin{example}
+	\begin{itemize}
+		\item \texttt{Nat $\to$ Nat}: functions from natural numbers to natural numbers
+		\item \texttt{Nat $\to$ Nat $\to$ Nat}: curried binary functions
+		\item \texttt{List Nat $\to$ Nat}: functions from lists to numbers
+	\end{itemize}
+\end{example}
+
+\subsubsection{Dependent Function Types (Pi Types)}
+
+A \emph{dependent function type} allows the output type to depend on the input \emph{value}.
+
+\begin{notation}
+	The dependent function type is written:
+	\begin{center}
+		\texttt{$\Pi$ (x : $\alpha$), $\beta$(x)} \quad or \quad \texttt{$\forall$ (x : $\alpha$), $\beta$(x)}
+	\end{center}
+	where $\beta$ is a type family indexed by $x : \alpha$.
+\end{notation}
+
+\begin{example}
+	\begin{itemize}
+		\item \texttt{$\forall$ (n : Nat), Vec $\alpha$ n}: functions that take a natural number $n$ and return a vector of length $n$
+		\item \texttt{$\forall$ ($\alpha$ : Type), $\alpha$ $\to$ $\alpha$}: the polymorphic identity function
+		\item \texttt{$\forall$ (n : Nat), Fin n $\to$ $\alpha$}: functions from $n$-element finite sets
+	\end{itemize}
+\end{example}
+
+When the output type does \emph{not} depend on the input value, the Pi type reduces to an ordinary function type: \texttt{$\Pi$ (x : $\alpha$), $\beta$ $\equiv$ $\alpha$ $\to$ $\beta$}.
+
+\subsection{Inductive Types}
+
+Inductive types are the primary mechanism for introducing new types in Lean. An inductive type is specified by its \emph{constructors}.
+
+\subsubsection{Natural Numbers}
+
+\begin{definition}[Natural Numbers]
+	The type \texttt{Nat} is defined inductively:
+	\begin{itemize}
+		\item \texttt{zero : Nat}
+		\item \texttt{succ : Nat $\to$ Nat}
+	\end{itemize}
+	Every natural number is either \texttt{zero} or \texttt{succ n} for some \texttt{n : Nat}.
+\end{definition}
+
+\begin{example}
+	In Lean notation:
+	\begin{itemize}
+		\item $0$ is represented as \texttt{.zero}
+		\item $1$ is \texttt{.succ .zero}
+		\item $2$ is \texttt{.succ (.succ .zero)}
+	\end{itemize}
+	(Lean provides decimal notation as syntactic sugar.)
+\end{example}
+
+Functions on inductive types are defined by \emph{pattern matching} and \emph{recursion}.
+
+\begin{example}[Addition on Natural Numbers]
+	\begin{verbatim}
+def add : Nat → Nat → Nat
+  | m, .zero   => m
+  | m, .succ n => .succ (add m n)
+    \end{verbatim}
+\end{example}
+
+\subsubsection{Product Types}
+
+\begin{definition}[Product Type]
+	The product \texttt{$\alpha$ $\times$ $\beta$} (or \texttt{Prod $\alpha$ $\beta$}) has one constructor:
+	\begin{center}
+		\texttt{mk : $\alpha$ $\to$ $\beta$ $\to$ $\alpha$ $\times$ $\beta$}
+	\end{center}
+	We write \texttt{(a, b)} for \texttt{mk a b}.
+\end{definition}
+
+\begin{example}
+	\begin{itemize}
+		\item \texttt{(3, \enquote{hello}) : Nat $\times$ String}
+		\item \texttt{fst : $\alpha$ $\times$ $\beta$ $\to$ $\alpha$} extracts the first component
+		\item \texttt{snd : $\alpha$ $\times$ $\beta$ $\to$ $\beta$} extracts the second component
+	\end{itemize}
+\end{example}
+
+\subsubsection{Sum Types}
+
+\begin{definition}[Sum Type]
+	The sum \texttt{$\alpha$ $\oplus$ $\beta$} (or \texttt{Sum $\alpha$ $\beta$}) has two constructors:
+	\begin{itemize}
+		\item \texttt{inl : $\alpha$ $\to$ $\alpha$ $\oplus$ $\beta$} (left injection)
+		\item \texttt{inr : $\beta$ $\to$ $\alpha$ $\oplus$ $\beta$} (right injection)
+	\end{itemize}
+\end{definition}
+
+\begin{example}
+	To define a function \texttt{f : $\alpha$ $\oplus$ $\beta$ $\to$ $\gamma$}, pattern match:
+	\begin{verbatim}
+def f : α ⊕ β → γ
+  | .inl a => ... -- handle case when input is from α
+  | .inr b => ... -- handle case when input is from β
+    \end{verbatim}
+\end{example}
+
+\subsubsection{Lists}
+
+\begin{definition}[List Type]
+	The type \texttt{List $\alpha$} is defined inductively:
+	\begin{itemize}
+		\item \texttt{nil : List $\alpha$} (empty list)
+		\item \texttt{cons : $\alpha$ $\to$ List $\alpha$ $\to$ List $\alpha$} (prepend element)
+	\end{itemize}
+	We write \texttt{[]} for \texttt{nil} and \texttt{h :: t} for \texttt{cons h t}.
+\end{definition}
+
+\begin{example}
+	The list $[1, 2, 3]$ is encoded as:
+	\begin{center}
+		\texttt{1 :: 2 :: 3 :: []}
+	\end{center}
+\end{example}
+
+\subsection{The Three Kinds of Types}
+
+Every type in Lean falls into one of three categories:
+
+\begin{enumerate}
+	\item \textbf{Function types}: \texttt{$\alpha$ $\to$ $\beta$} or dependent \texttt{$\Pi$ (x : $\alpha$), $\beta$(x)}
+
+	\item \textbf{Inductive types}: Defined by constructors
+	      \begin{itemize}
+		      \item Built-in: \texttt{Nat}, \texttt{Prop} propositions (\texttt{True}, \texttt{False}, \texttt{And}, \texttt{Or})
+		      \item User-defined: Custom types via \texttt{inductive} keyword
+	      \end{itemize}
+
+	\item \textbf{Quotient types}: \texttt{Quotient R} for equivalence relation \texttt{R : $\alpha$ $\to$ $\alpha$ $\to$ Prop}
+	      \begin{itemize}
+		      \item Models sets with equivalence (e.g., integers as equivalence classes of pairs of naturals)
+		      \item Provides \texttt{Quot.mk : $\alpha$ $\to$ Quotient R} and \texttt{Quot.sound : R a b $\to$ mk a = mk b}
+	      \end{itemize}
+\end{enumerate}
+
+\begin{remark}
+	Quotient types are unique to Lean among proof assistants: they allow direct encoding of mathematical structures defined up to equivalence, without using setoids.
+\end{remark}
+
+\subsection{Type Class Inference}
+
+Lean uses \emph{type classes} for ad-hoc polymorphism. A type class is a structure type marked with the \texttt{class} keyword.
+
+\begin{example}
+	The type class \texttt{Add $\alpha$} specifies that type $\alpha$ supports addition:
+	\begin{verbatim}
+class Add (α : Type u) where
+  add : α → α → α
+    \end{verbatim}
+\end{example}
+
+Instances are registered with \texttt{instance}, and Lean's elaborator automatically finds instances during type checking.
+
+\begin{example}
+	\begin{itemize}
+		\item \texttt{[Add Nat]}: instance for natural number addition
+		\item \texttt{[Add Int]}: instance for integer addition
+		\item \texttt{a + b} desugars to \texttt{Add.add a b}, with the instance inferred
+	\end{itemize}
+\end{example}
+
+\subsection{Definitional vs. Propositional Equality}
+
+Lean distinguishes two notions of equality:
+
+\begin{definition}[Definitional Equality]
+	Two terms are \emph{definitionally equal} (written $\equiv$) if they reduce to the same normal form by computation (beta-reduction, delta-unfolding, iota-reduction).
+\end{definition}
+
+\begin{definition}[Propositional Equality]
+	Two terms are \emph{propositionally equal} (written \texttt{a = b : Prop}) if there exists a proof term \texttt{h : a = b}.
+\end{definition}
+
+\begin{example}
+	\begin{itemize}
+		\item \texttt{2 + 2} and \texttt{4} are definitionally equal
+		\item \texttt{n + 0} and \texttt{n} are propositionally but not definitionally equal (requires induction)
+	\end{itemize}
+\end{example}
+
+Definitional equality is checked automatically by Lean's kernel; propositional equality requires explicit proof.
+
+\subsection{Summary}
+
+The type theory of Lean provides:
+\begin{itemize}
+	\item A universe hierarchy with \texttt{Prop} and \texttt{Type u}
+	\item Propositions-as-types interpretation (Curry-Howard)
+	\item Dependent function types (Pi types) for universal quantification
+	\item Inductive types for data structures and propositions
+	\item Quotient types for equivalence classes
+	\item Type classes for overloading and inference
+	\item Two notions of equality: definitional and propositional
+\end{itemize}
+
+This foundation enables Lean to serve simultaneously as a programming language, a theorem prover, and a formalization system for mathematics.
 
 \end{document}

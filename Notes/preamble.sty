@@ -1,5 +1,5 @@
 % Imperial Course Notes Preamble
-% Simple, clean style for mathematical notes
+% Colorful theorem boxes (Evan Chen style)
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{preamble}[2025/01/01 Imperial Notes Style]
@@ -8,6 +8,13 @@
 \RequirePackage{amsmath,amssymb,amsthm}
 \RequirePackage{mathtools}
 \RequirePackage{mathrsfs}
+\RequirePackage{xcolor}
+
+% Colorful theorem boxes (Evan Chen style)
+\RequirePackage[framemethod=TikZ]{mdframed}
+\RequirePackage{thmtools}
+\RequirePackage{tcolorbox}
+\tcbuselibrary{theorems,skins,breakable}
 
 % Diagrams
 \RequirePackage{tikz-cd}
@@ -20,21 +27,110 @@
 % Subfiles for chapter-level compilation
 \RequirePackage{subfiles}
 
-% Theorem environments
-\theoremstyle{plain}
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{corollary}[theorem]{Corollary}
+% Color definitions for theorem boxes
+\definecolor{TealBlue}{RGB}{0,128,128}
+\definecolor{Salmon}{RGB}{250,128,114}
+\definecolor{ForestGreen}{RGB}{34,139,34}
+\definecolor{RawSienna}{RGB}{199,97,20}
+\definecolor{RedViolet}{RGB}{199,21,133}
 
-\theoremstyle{definition}
-\newtheorem{definition}[theorem]{Definition}
-\newtheorem{example}[theorem]{Example}
-\newtheorem{exercise}[theorem]{Exercise}
+% Blue box style (for theorems, lemmas, propositions, corollaries)
+\mdfdefinestyle{mdbluebox}{%
+    roundcorner=10pt,
+    linewidth=1pt,
+    skipabove=12pt,
+    innerbottommargin=9pt,
+    skipbelow=2pt,
+    linecolor=TealBlue,
+    nobreak=true,
+    backgroundcolor=TealBlue!5,
+}
 
-\theoremstyle{remark}
-\newtheorem{remark}[theorem]{Remark}
-\newtheorem{notation}[theorem]{Notation}
+% Red box style (for examples)
+\mdfdefinestyle{mdredbox}{%
+    roundcorner=10pt,
+    linewidth=1pt,
+    skipabove=12pt,
+    innerbottommargin=9pt,
+    skipbelow=2pt,
+    linecolor=RawSienna,
+    nobreak=true,
+    backgroundcolor=Salmon!5,
+}
+
+% Green box style (for notation)
+\mdfdefinestyle{mdgreenbox}{%
+    skipabove=8pt,
+    linewidth=2pt,
+    rightline=false,
+    leftline=true,
+    topline=false,
+    bottomline=false,
+    linecolor=ForestGreen,
+    backgroundcolor=ForestGreen!5,
+}
+
+% Black box style (for remarks)
+\mdfdefinestyle{mdblackbox}{%
+    skipabove=8pt,
+    linewidth=2pt,
+    rightline=false,
+    leftline=true,
+    topline=false,
+    bottomline=false,
+    linecolor=black,
+    backgroundcolor=RedViolet!5!gray!5,
+}
+
+% Theorem environments with colorful boxes
+\declaretheoremstyle[
+    headfont=\sffamily\bfseries\color{TealBlue},
+    mdframed={style=mdbluebox},
+    headpunct={\\[3pt]},
+    postheadspace={0pt}
+]{thmbluebox}
+
+\declaretheoremstyle[
+    headfont=\sffamily\bfseries\color{RawSienna},
+    mdframed={style=mdredbox},
+    headpunct={\\[3pt]},
+    postheadspace={0pt}
+]{thmredbox}
+
+\declaretheoremstyle[
+    headfont=\sffamily\bfseries\color{ForestGreen},
+    mdframed={style=mdgreenbox},
+    headpunct={\\[3pt]},
+    postheadspace={0pt}
+]{thmgreenbox}
+
+\declaretheoremstyle[
+    headfont=\sffamily\bfseries,
+    mdframed={style=mdblackbox},
+    headpunct={\\[3pt]},
+    postheadspace={0pt}
+]{thmblackbox}
+
+% Define theorem-like environments
+\declaretheorem[style=thmbluebox, name=Theorem, numberwithin=section]{theorem}
+\declaretheorem[style=thmbluebox, name=Lemma, sibling=theorem]{lemma}
+\declaretheorem[style=thmbluebox, name=Proposition, sibling=theorem]{proposition}
+\declaretheorem[style=thmbluebox, name=Corollary, sibling=theorem]{corollary}
+
+% Definition environment (blue box)
+\declaretheorem[style=thmbluebox, name=Definition, sibling=theorem]{definition}
+
+% Example environment (red box)
+\declaretheorem[style=thmredbox, name=Example, numberwithin=section]{example}
+
+% Exercise environment (red box)
+\declaretheorem[style=thmredbox, name=Exercise, numberwithin=section]{exercise}
+
+% Remark environment (black box)
+\declaretheorem[style=thmblackbox, name=Remark, numberwithin=section]{remark}
+
+% Notation environment (green box)
+\declaretheorem[style=thmgreenbox, name=Notation, numberwithin=section]{notation}
 
 % Common math operators
 \DeclareMathOperator{\Hom}{Hom}
